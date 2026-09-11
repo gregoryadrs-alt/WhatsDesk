@@ -1,0 +1,291 @@
+{
+  "name": "sendMessage",
+  "nodes": [
+    {
+      "parameters": {
+        "amount": "={{ Math.floor(Math.random() * (5 - 1 + 1)) + 1 }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1632,
+        -368
+      ],
+      "id": "b6c872c5-0c66-4a11-82ce-c31fe71f1dea",
+      "name": "Wait",
+      "webhookId": "c9004f93-5a7c-4751-8b0a-ee1fca235b95"
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Seen",
+        "session": "={{ $('Start').item.json.waha_session }}",
+        "chatId": "={{ $('Start').item.json.user_chat_id }}",
+        "messageId": "={{ $('Start').item.json.user_message_id }}",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        1856,
+        -368
+      ],
+      "id": "fbdf0db7-9421-4d63-9d49-657e9e08d350",
+      "name": "Send Seen",
+      "credentials": {
+        "wahaApi": {
+          "id": "3QGWzQbcNpHj2Hg9",
+          "name": "WAHA account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": "={{ Math.floor(Math.random() * (3 - 1 + 1)) + 1 }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2080,
+        -368
+      ],
+      "id": "2afb52b6-7d79-4852-b658-7a8fb7a0457d",
+      "name": "Wait1",
+      "webhookId": "8ae66050-a5e6-4371-a43a-bef4ddf29100"
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Start Typing",
+        "session": "={{ $('Start').item.json.waha_session }}",
+        "chatId": "={{ $('Start').item.json.user_chat_id }}",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        2304,
+        -368
+      ],
+      "id": "e0f47c5e-2dba-47ce-8a5c-672fac633b91",
+      "name": "Start Typing",
+      "credentials": {
+        "wahaApi": {
+          "id": "3QGWzQbcNpHj2Hg9",
+          "name": "WAHA account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": "={{ Math.floor((Math.random() * (5 - 1 + 1) + 1)) }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2528,
+        -368
+      ],
+      "id": "c73309a0-ef21-4fcf-b408-d22822fb5de6",
+      "name": "Wait2",
+      "webhookId": "631860a2-1a10-41c7-a6bf-a5b3320a595e"
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Stop Typing",
+        "session": "={{ $('Start').item.json.waha_session }}",
+        "chatId": "={{ $('Start').item.json.user_chat_id }}",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        2752,
+        -368
+      ],
+      "id": "0aa5fbe9-9abe-48d6-a8b2-236de8b5ccfa",
+      "name": "Stop Typing",
+      "credentials": {
+        "wahaApi": {
+          "id": "3QGWzQbcNpHj2Hg9",
+          "name": "WAHA account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": "={{ Math.floor((Math.random() * (7 - 1 + 1) + 1)) }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2928,
+        -368
+      ],
+      "id": "9507e6a6-980c-4f39-9c14-ae3fa04cc018",
+      "name": "Wait3",
+      "webhookId": "a6d18414-fce5-486a-bdca-8aedbe7d6db9"
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Text",
+        "session": "={{ $('Start').item.json.waha_session }}",
+        "chatId": "={{ $('Start').item.json.user_chat_id }}",
+        "text": "={{ $('Start').item.json.output }}",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        3152,
+        -368
+      ],
+      "id": "91d6ec61-ba14-4e20-8d32-d841d19d18fa",
+      "name": "Send a text message",
+      "credentials": {
+        "wahaApi": {
+          "id": "3QGWzQbcNpHj2Hg9",
+          "name": "WAHA account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "waha_session",
+              "type": "any"
+            },
+            {
+              "name": "user_chat_id",
+              "type": "any"
+            },
+            {
+              "name": "user_message_id",
+              "type": "any"
+            },
+            {
+              "name": "output",
+              "type": "any"
+            }
+          ]
+        }
+      },
+      "id": "b71c0464-7951-4301-9997-90e51d46d91f",
+      "typeVersion": 1.1,
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        1424,
+        -368
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Send Seen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Seen": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Start Typing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start Typing": {
+      "main": [
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait2": {
+      "main": [
+        [
+          {
+            "node": "Stop Typing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stop Typing": {
+      "main": [
+        [
+          {
+            "node": "Wait3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait3": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "e873ddb5-a5b2-4c31-a97b-ae645f6dd8d9",
+  "meta": {
+    "instanceId": "af4eb2a06757fcc24402c92c535bf537f2a50278975b9bb239f42dd70b8cb531"
+  },
+  "nodeGroups": [],
+  "id": "Hj5u2iirrbTsoDAT",
+  "tags": []
+}

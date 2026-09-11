@@ -1,0 +1,410 @@
+{
+  "name": "generateInvoice",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "invoice_number"
+            },
+            {
+              "name": "customer_name"
+            },
+            {
+              "name": "phone_number",
+              "type": "number"
+            },
+            {
+              "name": "total_amount",
+              "type": "number"
+            },
+            {
+              "name": "output_items_parseJson",
+              "type": "any"
+            },
+            {
+              "name": "waha",
+              "type": "any"
+            }
+          ]
+        }
+      },
+      "id": "c055762a-8fe7-4141-a639-df2372f30060",
+      "typeVersion": 1.1,
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        -1200,
+        -1008
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "Hyi5rhMUaqDxdJeA",
+          "mode": "list",
+          "cachedResultName": "invoices",
+          "cachedResultUrl": "/projects/9rpT09WmBICv6OvG/datatables/Hyi5rhMUaqDxdJeA"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "invoice_number",
+              "keyValue": "={{ $json.invoice_number }}"
+            }
+          ]
+        },
+        "limit": 1
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -752,
+        -1008
+      ],
+      "id": "8038e307-fa76-42b8-bd7d-f8a372c0b7ab",
+      "name": "get existing invoices",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e6a38e9e-4133-4db0-8b10-beef75cf0880",
+              "leftValue": "={{ $('get existing invoices').item.json.isNotEmpty() }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -528,
+        -1008
+      ],
+      "id": "0a976e69-4a64-4b77-889c-47762201b8b8",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\n\n// Parse items safely\nlet rawItems = [];\ntry {\n  rawItems = JSON.parse(data.output_items_parseJson || \"[]\");\n} catch (e) {\n  rawItems = [];\n}\n\n// Normalize items to consistent keys: name/price/quantity\nconst items = rawItems\n  .map((it) => {\n    const name = (it.product ?? it.product_name ?? it.name ?? it.item_name ?? \"\")\n      .toString()\n      .trim();\n\n    const quantity = Number(it.quantity ?? 0);\n    const price = Number(it.price ?? 0);\n\n    return { name, quantity, price };\n  })\n  // Drop bad rows (empty name or zero quantity)\n  .filter((it) => it.name && it.quantity > 0);\n\nlet subtotal = 0;\n\nconst rowsHtml = items\n  .map((it, i) => {\n    const line = it.price * it.quantity;\n    subtotal += line;\n\n    return `\n      <tr>\n        <td>${i + 1}</td>\n        <td>${it.name}</td>\n        <td style=\"text-align:right;\">Rp ${it.price.toLocaleString(\"id-ID\")}</td>\n        <td style=\"text-align:right;\">${it.quantity}</td>\n        <td style=\"text-align:right;\">Rp ${line.toLocaleString(\"id-ID\")}</td>\n      </tr>\n    `;\n  })\n  .join(\"\");\n\n// Ensure total is numeric (fallback to subtotal if missing)\nconst totalAmount = Number(data.total_amount ?? 0) || subtotal;\n\n// ✅ One-line items string with subtotal & total\nconst items_string =\n  items\n    .map((it) => `${it.name} x${it.quantity} @ Rp ${it.price.toLocaleString(\"id-ID\")}`)\n    .join(\", \") +\n  ` | Subtotal: Rp ${subtotal.toLocaleString(\"id-ID\")}` +\n  ` | Total: Rp ${totalAmount.toLocaleString(\"id-ID\")}`;\n\n// Expired at +1 day (ISO)\nconst expiredAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();\n\n// OPTIONAL but useful for Mayar \"Items\" field if it needs structured items\nconst mayar_items = items.map((it) => ({\n  name: it.name,\n  quantity: it.quantity,\n  price: it.price,\n}));\n\n// --- BAGIAN YANG DITAMBAHKAN ---\n// 1. Logika untuk mengatasi nama yang terlalu pendek\nlet custName = (data.customer_name ?? \"\").toString();\nif (custName.length < 3) {\n  custName = \"Gregory\"; \n}\n\n// 2. Format tanggal standar API (YYYY-MM-DD)\nconst isoDate = new Date().toISOString().split('T')[0];\n// --------------------------------\n\nreturn [\n  {\n    json: {\n      invoice_number: data.invoice_number || `INV-${new Date().toISOString().slice(0, 10).replace(/-/g, \"\")}`,\n      customer_name: custName, // <-- Memasukkan variabel nama yang sudah difilter\n      phone_number: (data.phone_number ?? \"\").toString(),\n      rowsHtml,\n      subtotal,\n      total_amount: totalAmount,\n      invoice_date: isoDate, // <-- Menggunakan format tanggal standar\n      items_string,\n      expired_at: expiredAt,\n      mayar_items, \n    },\n  },\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -976,
+        -1008
+      ],
+      "id": "8a5c31a4-7804-4706-a7e6-794b018d398f",
+      "name": "prepare data"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "Hyi5rhMUaqDxdJeA",
+          "mode": "list",
+          "cachedResultName": "invoices",
+          "cachedResultUrl": "/projects/9rpT09WmBICv6OvG/datatables/Hyi5rhMUaqDxdJeA"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "phone_number": "={{ $('prepare data').item.json.phone_number }}",
+            "name": "={{ $('prepare data').item.json.customer_name }}",
+            "content": "={{ $('When Executed by Another Workflow').item.json.output_items_parseJson }}",
+            "total_amount": "={{ $('prepare data').item.json.total_amount }}",
+            "status": "PENDING",
+            "invoice_number": "={{ $('prepare data').item.json.invoice_number }}",
+            "transaction_id": "={{ $json.data.transactionId }}",
+            "payment_link": "={{ $json.data.link }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "phone_number",
+              "displayName": "phone_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "content",
+              "displayName": "content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "total_amount",
+              "displayName": "total_amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "payment_link",
+              "displayName": "payment_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "invoice_number",
+              "displayName": "invoice_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "transaction_id",
+              "displayName": "transaction_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        -928
+      ],
+      "id": "8d846f78-f6ac-4a37-b33e-b5eabb9cefdf",
+      "name": "Insert row"
+    },
+    {
+      "parameters": {
+        "html": "<!doctype html>\n<html>\n<head>\n  <meta charset=\"utf-8\">\n  <style>\n    .btn-pay {\n      display: inline-block;\n      margin-top: 24px;\n      padding: 12px 24px;\n      background: #16a34a;\n      color: #ffffff;\n      text-decoration: none;\n      border-radius: 6px;\n      font-weight: bold;\n      font-size: 14px;\n    }\n\n    .btn-pay:hover {\n      background: #15803d;\n    }\n\n    .btn-wrapper {\n      text-align: left;\n    }\n\n    body {\n      font-family: Arial, sans-serif;\n      font-size: 12px;\n    }\n\n    .container {\n      width: 720px;\n      margin: auto;\n    }\n\n    h1 {\n      margin-bottom: 4px;\n    }\n\n    table {\n      width: 100%;\n      border-collapse: collapse;\n      margin-top: 16px;\n    }\n\n    th,\n    td {\n      border-bottom: 1px solid #ddd;\n      padding: 8px;\n    }\n\n    th {\n      background: #f5f5f5;\n    }\n\n    .right {\n      text-align: right;\n    }\n\n    .total {\n      font-weight: bold;\n      font-size: 14px;\n    }\n  </style>\n</head>\n\n<body>\n  <div class=\"container\">\n    <h1>Invoice</h1>\n\n    <p>\n      <strong>Invoice #:</strong>\n      {{ $('prepare data').item.json.invoice_number }}\n      <br>\n      <strong>Date:</strong>\n{{ DateTime.fromISO($('Create Invoice').item.json.data.expiredAt).minus({ days: 1 }).toLocaleString(DateTime.DATETIME_MED) }}\n    </p>\n\n    <table>\n      <thead>\n        <tr>\n          <th>#</th>\n          <th>Item</th>\n          <th class=\"right\">Price</th>\n          <th class=\"right\">Qty</th>\n          <th class=\"right\">Total</th>\n        </tr>\n      </thead>\n\n      <tbody>\n        {{ $('prepare data').item.json.rowsHtml }}\n      </tbody>\n\n      <tfoot>\n        <tr>\n          <td colspan=\"4\" class=\"right\">Subtotal</td>\n          <td class=\"right\">\n            Rp {{ $('prepare data').item.json.subtotal.format('id-ID') }}\n          </td>\n        </tr>\n\n        <tr>\n          <td colspan=\"4\" class=\"right total\">Total</td>\n          <td class=\"right total\">\n            Rp {{ $('prepare data').item.json.total_amount.format('id-ID') }}\n          </td>\n        </tr>\n      </tfoot>\n    </table>\n\n    <div class=\"btn-wrapper\">\n      <a\n        class=\"btn-pay\"\n        href=\"{{ $('Create Invoice').item.json.data.link }}\"\n        target=\"_blank\"\n      >\n        💳 Bayar\n      </a>\n    </div>\n  </div>\n</body>\n</html>\n"
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        176,
+        -928
+      ],
+      "id": "3c753ad4-a2a0-425b-9daa-757ab3e84bd2",
+      "name": "HTML"
+    },
+    {
+      "parameters": {
+        "operation": "htmlToPdf",
+        "html": "={{ $json.html }}",
+        "outputFilenamePdf": "={{$('prepare data').item.json.invoice_number}}.pdf"
+      },
+      "type": "@custom-js/n8n-nodes-pdf-toolkit-v2.pdfToolkit",
+      "typeVersion": 1,
+      "position": [
+        368,
+        -928
+      ],
+      "id": "aaeaa956-439a-4cac-ad79-e824da0acf2f",
+      "name": "Convert HTML to PDF",
+      "credentials": {
+        "customJsApi": {
+          "id": "AmDh8hPWuUW4o2kF",
+          "name": "CustomJS account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return {\n  link: $('Create Invoice').first().json.data.link\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        816,
+        -928
+      ],
+      "id": "ffd6cb81-c9f4-4e21-8521-30513934ad6d",
+      "name": "return"
+    },
+    {
+      "parameters": {
+        "jsCode": "return {\n  \"chat_id\":$('When Executed by Another Workflow').first().json.phone_number+\"@c.us\",\n  \"invoice\":$('get existing invoices').\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -272,
+        -1104
+      ],
+      "id": "a770b01f-e9d0-4816-ba77-b630e02f39f8",
+      "name": "return existing invoices"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "vf8H1QWl9m8WmmcD",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/vf8H1QWl9m8WmmcD",
+          "cachedResultName": "sendFile"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "binary": "={{ $('Convert HTML to PDF').item.binary }}",
+            "data": "={{ $('prepare data').item.json }}",
+            "waha": "={{ $('When Executed by Another Workflow').item.json.waha }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "data",
+              "displayName": "data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": false
+            },
+            {
+              "id": "waha",
+              "displayName": "waha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": false
+            },
+            {
+              "id": "binary",
+              "displayName": "binary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        592,
+        -928
+      ],
+      "name": "Call sendFile",
+      "id": "4838085e-0154-4bca-b2e5-26010848d152"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.mayar.io/hl/v2/invoices/create",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"name\": \"{{ $('prepare data').item.json.customer_name }}\",\n  \"email\": \"john@doe.com\",\n  \"mobile\": \"{{ $('prepare data').item.json.phone_number }}\",\n  \"description\": \"{{ $('prepare data').item.json.items_string }}\",\n  \"expiredAt\": \"{{ $('prepare data').item.json.expired_at }}\",\n  \"items\": [\n    {\n      \"description\": \"{{ $('prepare data').item.json.items_string.split(' x')[0].trim() }}\",\n      \"quantity\": {{ Number($('prepare data').item.json.items_string.match(/x(\\d+)/)?.[1]) || 1 }},\n      \"rate\": {{ Number($('prepare data').item.json.items_string.match(/@\\s*Rp\\s*([\\d.]+)/)?.[1].replace(/\\./g, '')) || 0 }}\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -160,
+        -928
+      ],
+      "id": "e81a8119-49f3-4856-adc2-fbaf00063cfc",
+      "name": "Create Invoice",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ghc1myUXnuX4h7iC",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $('prepare data').first().json;\n// Konversi array items ke format Mayar v2 (description, quantity, rate)\nconst mayarV2Items = (item.mayar_items || []).map((it) => ({\n  description: it.name,\n  quantity: Number(it.quantity) || 1,\n  rate: Number(it.price) || 0\n}));\n\n// Pastikan nomor HP diawali 08 (jika format sebelumnya 628...)\nlet mobile = (item.phone_number || \"\").toString().trim();\nif (mobile.startsWith(\"62\")) {\n  mobile = \"0\" + mobile.slice(2);\n}\n\nreturn [\n  {\n    json: {\n      ...item,\n      phone_number_formatted: mobile,\n      mayar_v2_items: mayarV2Items\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -336,
+        -928
+      ],
+      "id": "eeaca65b-6041-4d7c-b402-9e26c96d6806",
+      "name": "preparedata2"
+    }
+  ],
+  "pinData": {}
+}

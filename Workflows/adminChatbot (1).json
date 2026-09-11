@@ -1,0 +1,593 @@
+{
+  "name": "adminChatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1808,
+        272
+      ],
+      "id": "c059b02a-9226-4662-9916-dd5bac23e8ef",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.waha.payload.body }}",
+        "options": {
+          "systemMessage": "=You are an intent classifier for a CRM/WhatsApp bot.\n\nReturn ONLY a valid JSON object (no markdown, no extra text).\n\nRules:\n\nChoose the best single intent from the list. If it is continuation from previous chats, then proceed it with matched or corresponding intent!. ie: if user says nama: kirim reminder ke semua user, then clearly it is REMINDER intent.\n\nIf unclear, use UNKNOWN.\n\nLanguage can be Indonesian or English.\n\nIntents:\n\nREMINDER: user asks to remind pending invoices.\n\nHELP: user asks how to use, bantuan, help.\n\nGREETINGS: user greets agent, and let agent greets them back\n\nOTHER: anything else\n\nUser message:"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -1600,
+        272
+      ],
+      "id": "ad14b120-a04f-4ab5-8363-b89a10f5fc92",
+      "name": "Intent Classifier"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1616,
+        496
+      ],
+      "id": "38f9f2ef-4942-4ee8-a372-4eefb8650716",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SOMUWr5hhoiVEoN8",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.user.phone_number }}",
+        "contextWindowLength": "=5"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -1456,
+        496
+      ],
+      "id": "20c42095-e612-4c5c-9be3-2ff8dff2ba36",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.parseJson().intent}}",
+                    "rightValue": "REMIINDER",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "183e963a-ede6-49ed-8c91-0b352334c338"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "REMINDER"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "71c11e4c-9904-47ed-a39b-02e08b395159",
+                    "leftValue": "={{ $json.output.parseJson().intent}}",
+                    "rightValue": "=HELP",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "HELP"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "ecf217bf-acda-4bd4-a843-72f84ebb1695",
+                    "leftValue": "={{ $json.output.parseJson().intent}}",
+                    "rightValue": "OTHER",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "OTHER"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "dda1878e-c92e-4467-babe-31a2de1b0857",
+                    "leftValue": "={{ $json.output.parseJson().intent}}",
+                    "rightValue": "GREETINGS",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "=GREETINGS"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -1280,
+        240
+      ],
+      "id": "e1e0dd69-815a-40b1-96f3-43b688351f40",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "gvo2C20vOE9gNiQT",
+          "mode": "list",
+          "cachedResultName": "Invoices",
+          "cachedResultUrl": "/projects/dMsIA3pEwYnpuDsV/datatables/gvo2C20vOE9gNiQT"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "status",
+              "keyValue": "PENDING"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -976,
+        208
+      ],
+      "id": "b398d99c-a5fa-4d61-8fc8-9e87cbec4961",
+      "name": "Get All Pending Invoices"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2534af45-4814-49ac-9ebf-28a8f5fd2d8d",
+              "leftValue": "={{ $('Get All Pending Invoices').all().length }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            },
+            {
+              "id": "ec73210b-6934-4246-b431-c5f7bf48f0fa",
+              "leftValue": "={{ $('Get All Pending Invoices').item.json.invoice_number }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -752,
+        208
+      ],
+      "id": "1bace51c-8ff6-4928-84c4-6c3bb7415f54",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -208,
+        96
+      ],
+      "id": "5b7edb38-9964-4432-bc10-27492969bfdf",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Text",
+        "session": "=crm",
+        "chatId": "={{ $json.phone_number }}",
+        "reply_to": "=",
+        "text": "=mohon selesaikan pembayaran anda :  {{ $json.payment_link }}",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        208,
+        192
+      ],
+      "id": "8fffe0d7-0727-4985-8b3b-12df1a69f061",
+      "name": "Send a text message1",
+      "credentials": {
+        "wahaApi": {
+          "id": "3QGWzQbcNpHj2Hg9",
+          "name": "WAHA account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Text",
+        "session": "=crm",
+        "chatId": "={{ $('When Executed by Another Workflow').item.json.waha.payload.from }}",
+        "text": "=reminder berhasil dikirim ke {{ $('Get All Pending Invoices').all().length }} customer",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        0,
+        0
+      ],
+      "id": "b2867da3-fac8-4e28-9b17-339302999b60",
+      "name": "Send a text message2",
+      "credentials": {
+        "wahaApi": {
+          "id": "3QGWzQbcNpHj2Hg9",
+          "name": "WAHA account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('When Executed by Another Workflow').item.json.waha.payload.body }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "you are helpful assistan,reply users greeting in bahasa indonesia and casual style"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -1072,
+        448
+      ],
+      "id": "ae22733b-0d9b-49fb-8dc3-54bc4ac80740",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1072,
+        640
+      ],
+      "id": "939edb56-28ba-4ebd-bce2-fdf95ef9ffdc",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SOMUWr5hhoiVEoN8",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "Hj5u2iirrbTsoDAT",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/Hj5u2iirrbTsoDAT",
+          "cachedResultName": "sendMessage"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "waha_session": "={{ $('When Executed by Another Workflow').item.json.waha.session }}",
+            "user_chat_id": "={{ $('When Executed by Another Workflow').item.json.user.chat_id }}",
+            "user_message_id": "={{ $('When Executed by Another Workflow').item.json.user.message_id }}",
+            "output": "={{ $json.text }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "waha_session",
+              "displayName": "waha_session",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "user_chat_id",
+              "displayName": "user_chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "user_message_id",
+              "displayName": "user_message_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "output",
+              "displayName": "output",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -704,
+        448
+      ],
+      "id": "265e64a3-9bef-4728-9761-5d3f3b1b8aa6",
+      "name": "Call 'sendMessage'3"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "Hj5u2iirrbTsoDAT",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/Hj5u2iirrbTsoDAT",
+          "cachedResultName": "sendMessage"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "waha_session": "={{ $('When Executed by Another Workflow').item.json.waha.session }}",
+            "user_chat_id": "={{ $('When Executed by Another Workflow').item.json.user.chat_id }}",
+            "user_message_id": "={{ $('When Executed by Another Workflow').item.json.user.message_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "waha_session",
+              "displayName": "waha_session",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "user_chat_id",
+              "displayName": "user_chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "user_message_id",
+              "displayName": "user_message_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "output",
+              "displayName": "output",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -480,
+        320
+      ],
+      "id": "b65f5f3a-3bc3-44ea-8120-9ed11fdf88c7",
+      "name": "Call 'sendMessage'4"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "FOkFdRnHmkuvCSdF",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/FOkFdRnHmkuvCSdF",
+          "cachedResultName": "generateInvoice"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "phone_number": 0,
+            "total_amount": 0
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "invoice_number",
+              "displayName": "invoice_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "phone_number",
+              "displayName": "phone_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number",
+              "removed": false
+            },
+            {
+              "id": "total_amount",
+              "displayName": "total_amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number",
+              "removed": false
+            },
+            {
+              "id": "output_items_parseJson",
+              "displayName": "output_items_parseJson",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "waha",
+              "displayName": "waha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        32,
+        176
+      ],
+      "id": "00b8caf5-6905-4863-b331-a73ef831c692",
+      "name": "Call 'generateInvoice'"
+    }
+  ],
+  "pinData": {}
+}

@@ -1,0 +1,574 @@
+{
+  "name": "sendFile",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "jsonExample",
+        "jsonExample": "{\n  \"data\": {},\n  \"waha\":{},\n  \"binary\": {}\n}"
+      },
+      "id": "20313e05-dbf8-476b-947f-09f53e5bfaea",
+      "typeVersion": 1.1,
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        384,
+        -912
+      ]
+    },
+    {
+      "parameters": {
+        "amount": "={{ Math.floor(Math.random() * (5 - 1 + 1)) + 1 }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        576,
+        -912
+      ],
+      "id": "485e7f97-bb2e-4d84-8271-a6ac158a4b64",
+      "name": "Wait",
+      "webhookId": "c9004f93-5a7c-4751-8b0a-ee1fca235b95"
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Seen",
+        "session": "={{ $('Start').item.json.waha.session }}",
+        "chatId": "={{ $('Start').item.json.data.phone_number }}@c.us",
+        "messageId": "={{ $('Start').item.json.waha.payload.id }}",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        800,
+        -912
+      ],
+      "id": "f1ff0700-72ce-44fa-9d67-a17f0eee989e",
+      "name": "Send Seen",
+      "credentials": {
+        "wahaApi": {
+          "id": "3QGWzQbcNpHj2Hg9",
+          "name": "WAHA account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": "={{ Math.floor(Math.random() * (3 - 1 + 1)) + 1 }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1024,
+        -912
+      ],
+      "id": "befb911e-73a8-4664-824d-94579223a4af",
+      "name": "Wait1",
+      "webhookId": "8ae66050-a5e6-4371-a43a-bef4ddf29100"
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Start Typing",
+        "session": "={{ $('Start').item.json.waha.session }}",
+        "chatId": "={{ $('Start').item.json.data.phone_number }}@c.us",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        1248,
+        -912
+      ],
+      "id": "2d5e05f1-e07c-46e6-bf06-ce367cd5c372",
+      "name": "Start Typing",
+      "credentials": {
+        "wahaApi": {
+          "id": "3QGWzQbcNpHj2Hg9",
+          "name": "WAHA account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": "={{ Math.floor((Math.random() * (5 - 1 + 1) + 1)) }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1472,
+        -912
+      ],
+      "id": "48ab4040-c0e9-4d4d-9834-e9ed700737b3",
+      "name": "Wait2",
+      "webhookId": "631860a2-1a10-41c7-a6bf-a5b3320a595e"
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Stop Typing",
+        "session": "={{ $('Start').item.json.waha.session }}",
+        "chatId": "={{ $('Start').item.json.data.phone_number }}@c.us",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        1696,
+        -912
+      ],
+      "id": "1583af29-4e4f-49ee-ae94-fb248cbd7e66",
+      "name": "Stop Typing",
+      "credentials": {
+        "wahaApi": {
+          "id": "3QGWzQbcNpHj2Hg9",
+          "name": "WAHA account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": "={{ Math.floor((Math.random() * (7 - 1 + 1) + 1)) }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1872,
+        -912
+      ],
+      "id": "39e5ffe6-0238-4959-b5af-ecf8b207e1aa",
+      "name": "Wait3",
+      "webhookId": "a6d18414-fce5-486a-bdca-8aedbe7d6db9"
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send File",
+        "session": "={{ $('Start').item.json.waha.session }}",
+        "chatId": "={{ $('Start').item.json.data.phone_number }}@c.us",
+        "file": "={\n    \"mimetype\": \"{{$(\"Start\").item.binary.data.mimeType}}\",\n    \"filename\": \"{{ $('Start').item.binary.data.fileName }}\",\n    \"data\": \"{{ $('Extract from File').item.json.data}}\"\n}",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        2320,
+        -912
+      ],
+      "id": "62390ab2-49bd-4838-9059-fb7a18213505",
+      "name": "Send a file",
+      "credentials": {
+        "wahaApi": {
+          "id": "3QGWzQbcNpHj2Hg9",
+          "name": "WAHA account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "binaryPropertyName": "={{ $('Start').item.binary.data }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        2096,
+        -912
+      ],
+      "id": "0821bcd8-e82b-4256-b3f5-668aca414c2e",
+      "name": "Extract from File"
+    }
+  ],
+  "pinData": {
+    "Start": [
+      {
+        "json": {
+          "data": {
+            "invoice_number": "INV-#x-xx-xx-xx",
+            "customer_name": "xxxxxx",
+            "phone_number": "628xxxxxxxxx",
+            "rowsHtml": "\n      <tr>\n        <td>1</td>\n        <td>Product A (Jumbo) </td>\n        <td style=\"text-align:right;\">Rp 16.000</td>\n        <td style=\"text-align:right;\">2</td>\n        <td style=\"text-align:right;\">Rp 32.000</td>\n      </tr>\n    ",
+            "subtotal": 32000,
+            "total_amount": 32000,
+            "invoice_date": "2026-08-19",
+            "items_string": "Product A (Jumbo) x2 @ Rp 16.000 | Subtotal: Rp 32.000 | Total: Rp 32.000",
+            "expired_at": "2026-08-20T14:16:17.690Z",
+            "mayar_items": [
+              {
+                "name": "Product A (Jumbo)",
+                "quantity": 2,
+                "price": 16000
+              }
+            ]
+          },
+          "waha": {
+            "id": "evt_01m0c3v468vhyjcsmqqkttak6g",
+            "timestamp": 1787113083084,
+            "event": "message",
+            "session": "Greg",
+            "metadata": {},
+            "me": {
+              "id": "6282230372086@c.us",
+              "lid": "109131579048012@lid",
+              "pushName": "Toko Buah Greg",
+              "reachoutTimelock": null,
+              "messageCapping": {
+                "cappingStatus": "NONE",
+                "totalQuota": 0,
+                "usedQuota": 0,
+                "cycleStart": 0,
+                "cycleEnd": 1,
+                "mvStatus": "NOT_ELIGIBLE",
+                "oteStatus": "NOT_ELIGIBLE"
+              }
+            },
+            "payload": {
+              "id": "false_157930276028428@lid_AC2BEA3D43F7FEA64592409EF23743BA",
+              "timestamp": 1787113083,
+              "from": "157930276028428@lid",
+              "fromMe": false,
+              "source": "app",
+              "to": "6282230372086@c.us",
+              "body": "Halo kak mau checkout dong Product A (Jumbo) 2 porsi",
+              "hasMedia": false,
+              "media": null,
+              "ack": 1,
+              "ackName": "SERVER",
+              "location": null,
+              "vCards": [],
+              "_data": {
+                "id": {
+                  "fromMe": false,
+                  "remote": "157930276028428@lid",
+                  "id": "AC2BEA3D43F7FEA64592409EF23743BA",
+                  "$1": "false_157930276028428@lid_AC2BEA3D43F7FEA64592409EF23743BA",
+                  "_serialized": "false_157930276028428@lid_AC2BEA3D43F7FEA64592409EF23743BA"
+                },
+                "viewed": false,
+                "body": "Halo kak mau checkout dong Product A (Jumbo) 2 porsi",
+                "type": "chat",
+                "t": 1787113083,
+                "clientReceivedTsMillis": 1787113082940,
+                "serverStoreTimeMicros": 1787113083514024,
+                "notifyName": "Gregory Ad",
+                "from": "15xxxxxxxxx@lid",
+                "to": "628xxxxxxxxxxxxx@c.us",
+                "ack": 1,
+                "invis": false,
+                "isNewMsg": true,
+                "star": false,
+                "kicNotified": false,
+                "recvFresh": true,
+                "isFromTemplate": false,
+                "isAdsMedia": false,
+                "pollInvalidated": false,
+                "isSentCagPollCreation": false,
+                "latestEditMsgKey": null,
+                "latestEditSenderTimestampMs": null,
+                "mentionedJidList": [],
+                "groupMentions": [],
+                "isEventCanceled": false,
+                "eventInvalidated": false,
+                "isVcardOverMmsDocument": false,
+                "isForwarded": false,
+                "isQuestion": false,
+                "isSpoiler": false,
+                "questionReplyQuotedMessage": null,
+                "questionResponsesCount": 0,
+                "readQuestionResponsesCount": 0,
+                "forwardsCount": 0,
+                "hasReaction": false,
+                "newsletterAdminProfile": null,
+                "expiredTimestamp": null,
+                "viewMode": "VISIBLE",
+                "messageSecret": {
+                  "0": 194,
+                  "1": 76,
+                  "2": 122,
+                  "3": 158,
+                  "4": 236,
+                  "5": 231,
+                  "6": 56,
+                  "7": 126,
+                  "8": 219,
+                  "9": 90,
+                  "10": 202,
+                  "11": 236,
+                  "12": 176,
+                  "13": 174,
+                  "14": 169,
+                  "15": 189,
+                  "16": 201,
+                  "17": 144,
+                  "18": 148,
+                  "19": 222,
+                  "20": 125,
+                  "21": 131,
+                  "22": 226,
+                  "23": 166,
+                  "24": 60,
+                  "25": 138,
+                  "26": 14,
+                  "27": 221,
+                  "28": 255,
+                  "29": 30,
+                  "30": 33,
+                  "31": 20
+                },
+                "productHeaderImageRejected": false,
+                "lastPlaybackProgress": 0,
+                "isDynamicReplyButtonsMsg": false,
+                "isCarouselCard": false,
+                "parentMsgId": null,
+                "callSilenceReason": null,
+                "isVideoCall": false,
+                "callDuration": null,
+                "callCreator": null,
+                "callParticipants": null,
+                "isCallLink": null,
+                "callLinkToken": null,
+                "terminatedByDeviceSwitch": null,
+                "selfOtherDeviceConnected": null,
+                "bytesSent": null,
+                "bytesReceived": null,
+                "isMdHistoryMsg": false,
+                "stickerSentTs": 0,
+                "isAvatar": false,
+                "lastUpdateFromServerTs": 0,
+                "invokedBotWid": null,
+                "metaFrom": null,
+                "bizBotType": null,
+                "botDeepLinkToken": null,
+                "aiMediaCollectionInfo": null,
+                "expectedImageCount": null,
+                "expectedVideoCount": null,
+                "botResponseTargetId": null,
+                "botPluginType": null,
+                "botPluginReferenceIndex": null,
+                "botPluginSearchProvider": null,
+                "botPluginSearchUrl": null,
+                "botPluginSearchQuery": null,
+                "botPluginMaybeParent": false,
+                "botReelPluginThumbnailCdnUrl": null,
+                "botMessageDisclaimerText": null,
+                "botSessionTransparencyType": null,
+                "botMsgBodyType": null,
+                "botModeSelection": null,
+                "botModeOverride": null,
+                "reportingTokenInfo": {
+                  "stanzaTs": 1787113083,
+                  "reportingToken": {
+                    "0": 80,
+                    "1": 170,
+                    "2": 190,
+                    "3": 76,
+                    "4": 36,
+                    "5": 217,
+                    "6": 71,
+                    "7": 150,
+                    "8": 237,
+                    "9": 115,
+                    "10": 29,
+                    "11": 177,
+                    "12": 198,
+                    "13": 28,
+                    "14": 191,
+                    "15": 79
+                  },
+                  "version": 2,
+                  "reportingTag": {
+                    "0": 1,
+                    "1": 22,
+                    "2": 172,
+                    "3": 45,
+                    "4": 19,
+                    "5": 234,
+                    "6": 25,
+                    "7": 231,
+                    "8": 72,
+                    "9": 166,
+                    "10": 103,
+                    "11": 228,
+                    "12": 89,
+                    "13": 88,
+                    "14": 76,
+                    "15": 24,
+                    "16": 179,
+                    "17": 70,
+                    "18": 29,
+                    "19": 77
+                  }
+                },
+                "hatchMetadataSync": null,
+                "requiresDirectConnection": null,
+                "bizContentPlaceholderType": null,
+                "hostedBizEncStateMismatch": false,
+                "senderOrRecipientAccountTypeHosted": false,
+                "placeholderCreatedWhenAccountIsHosted": false,
+                "groupHistoryBundleMessageKey": null,
+                "groupHistoryBundleMetadata": null,
+                "groupHistoryIndividualMessageInfo": null,
+                "nonJidMentions": null,
+                "links": []
+              }
+            },
+            "engine": "WEBJS",
+            "environment": {
+              "version": "2026.8.1",
+              "engine": "WEBJS",
+              "tier": "CORE",
+              "browser": "/usr/bin/chromium",
+              "platform": "linux/x64",
+              "worker": {
+                "id": null
+              }
+            }
+          },
+          "binary": {
+            "data": {
+              "mimeType": "application/pdf",
+              "fileType": "pdf",
+              "fileExtension": "pdf",
+              "data": "filesystem-v2",
+              "fileName": "INV-#1-13-18-26.pdf",
+              "id": "filesystem-v2:workflows/FOkFdRnHmkuvCSdF/executions/378/binary_data/de4d661d-a3d3-42bb-9244-a28cf4e9e322",
+              "fileSize": "20.6 kB",
+              "bytes": 20620
+            }
+          }
+        },
+        "binary": {
+          "data": {
+            "mimeType": "application/pdf",
+            "fileType": "pdf",
+            "fileExtension": "pdf",
+            "data": "filesystem-v2",
+            "fileName": "INV-#1-13-18-26.pdf",
+            "id": "filesystem-v2:workflows/FOkFdRnHmkuvCSdF/executions/378/binary_data/de4d661d-a3d3-42bb-9244-a28cf4e9e322",
+            "fileSize": "20.6 kB",
+            "bytes": 20620
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Send Seen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Seen": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Start Typing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start Typing": {
+      "main": [
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait2": {
+      "main": [
+        [
+          {
+            "node": "Stop Typing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stop Typing": {
+      "main": [
+        [
+          {
+            "node": "Wait3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait3": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Send a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "52431814-7c51-4814-902c-c61fc512a65f",
+  "meta": {
+    "instanceId": "af4eb2a06757fcc24402c92c535bf537f2a50278975b9bb239f42dd70b8cb531"
+  },
+  "nodeGroups": [],
+  "id": "vf8H1QWl9m8WmmcD",
+  "tags": []
+}

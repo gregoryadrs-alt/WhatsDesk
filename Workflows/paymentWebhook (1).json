@@ -1,0 +1,201 @@
+{
+  "name": "paymentWebhook",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "0c0037a6-b362-457c-a147-b1199e83e37f",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -160,
+        16
+      ],
+      "id": "32e5ff1a-6f75-4d90-983c-dcb16311097c",
+      "name": "Webhook",
+      "webhookId": "0c0037a6-b362-457c-a147-b1199e83e37f"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "Hyi5rhMUaqDxdJeA",
+          "mode": "list",
+          "cachedResultName": "invoices",
+          "cachedResultUrl": "/projects/9rpT09WmBICv6OvG/datatables/Hyi5rhMUaqDxdJeA"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "phone_number",
+              "keyValue": "={{ $json.body.data.customerMobile.toNumber() }}"
+            },
+            {
+              "keyName": "transaction_id",
+              "keyValue": "={{ $json.body.data. }}"
+            }
+          ]
+        },
+        "limit": 1
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        64,
+        16
+      ],
+      "id": "369d5c26-a975-44c8-a7be-8af889481f8b",
+      "name": "get user",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "Hyi5rhMUaqDxdJeA",
+          "mode": "list",
+          "cachedResultName": "invoices",
+          "cachedResultUrl": "/projects/9rpT09WmBICv6OvG/datatables/Hyi5rhMUaqDxdJeA"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "transaction_id",
+              "keyValue": "={{ $('Webhook').item.json.body.data.transactionId }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "={{ $('Webhook').item.json.body.data.status }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "phone_number",
+              "displayName": "phone_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "content",
+              "displayName": "content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "total_amount",
+              "displayName": "total_amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "payment_link",
+              "displayName": "payment_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "invoice_number",
+              "displayName": "invoice_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "transaction_id",
+              "displayName": "transaction_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        16
+      ],
+      "id": "6ddd3c27-5570-4ab2-bd83-7a91ad3b2c03",
+      "name": "Update row(s)"
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Text",
+        "session": "=Greg",
+        "chatId": "={{ $json.phone_number }}@c.us",
+        "text": "=Terimakasih telah membayar invoice :{{ $json.invoice_number }}",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        464,
+        16
+      ],
+      "id": "e429691a-b092-4fc8-966a-b567c24d468d",
+      "name": "Send a text message",
+      "credentials": {
+        "wahaApi": {
+          "id": "3QGWzQbcNpHj2Hg9",
+          "name": "WAHA account"
+        }
+      }
+    }
+  ],
+  "pinData": {}
+}

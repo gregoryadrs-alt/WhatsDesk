@@ -1,0 +1,346 @@
+{
+  "name": "auth",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "814ee824-31ed-41c0-83dd-58713ae0d15e",
+              "leftValue": "={{ $json.pn }}",
+              "rightValue": "@g.us",
+              "operator": {
+                "type": "string",
+                "operation": "notEndsWith"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        272,
+        128
+      ],
+      "id": "c15cda5e-ffe7-47fd-81bd-f123be7f00d1",
+      "name": "if not from group?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "7b7d70a2-d607-490b-ba4c-a66a36143a62",
+              "leftValue": "={{ $json.pn }}",
+              "rightValue": "628xxxxxxxxxx",
+              "operator": {
+                "type": "string",
+                "operation": "notStartsWith"
+              }
+            },
+            {
+              "id": "bd7791c7-17a2-4023-b5df-f27033843995",
+              "leftValue": "={{ $json.pn }}",
+              "rightValue": "628xxxxxxxxxx",
+              "operator": {
+                "type": "string",
+                "operation": "notStartsWith"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        48
+      ],
+      "id": "ef9b1d5f-e824-4613-a5c2-674e11f8c042",
+      "name": "If not in blacklist?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "eb701624-0287-44c2-a381-0956c6e1f157",
+              "leftValue": "={{ $('get user').item.json.isEmpty() }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        896,
+        -48
+      ],
+      "id": "50b079d6-454a-4d77-b524-bb7385860863",
+      "name": "If user is not exists?"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1344,
+        -48
+      ],
+      "id": "d7e664f7-0d1e-4412-8b34-c63f41b72267",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "5c339455-efe5-4f61-b3c2-917582afee5b",
+      "typeVersion": 1.1,
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        -112,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=http://whatsapp:3000/api/{{ $json.session }}/lids/{{ $json.payload.from }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "wahaApi",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        64,
+        128
+      ],
+      "id": "0d5a86c3-e564-4258-b7ca-c0d88c5ef467",
+      "name": "getPhoneNumber",
+      "credentials": {
+        "wahaApi": {
+          "id": "3QGWzQbcNpHj2Hg9",
+          "name": "WAHA account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "qzAXntASvJ07Z0jH",
+          "mode": "list",
+          "cachedResultName": "users",
+          "cachedResultUrl": "/projects/9rpT09WmBICv6OvG/datatables/qzAXntASvJ07Z0jH"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "phone_number",
+              "keyValue": "={{ $('getPhoneNumber').item.json.pn .split(\"@\")[0]}}"
+            }
+          ]
+        },
+        "limit": 1
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        672,
+        -48
+      ],
+      "id": "82670292-8f22-4a13-821f-0c56ac6c817d",
+      "name": "get user",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "qzAXntASvJ07Z0jH",
+          "mode": "list",
+          "cachedResultName": "users",
+          "cachedResultUrl": "/projects/9rpT09WmBICv6OvG/datatables/qzAXntASvJ07Z0jH"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "phone_number",
+              "keyValue": "={{ $('getPhoneNumber').item.json.pn.split(\"@\")[0]}}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1120,
+        48
+      ],
+      "id": "b3f3f124-4844-4f22-8f45-4bf536b04c75",
+      "name": "get existing user/login"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.first().json.data"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        -48
+      ],
+      "id": "914594dd-debe-48da-86c6-ab1eedde0b55",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "jsCode": "return {}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        704,
+        144
+      ],
+      "id": "21fffa42-ab77-42bb-b130-35697d102927",
+      "name": "return empty - if not in blacklist"
+    },
+    {
+      "parameters": {
+        "jsCode": "return {}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        240
+      ],
+      "id": "0b00095f-014b-4c6c-a592-e33ba103fed0",
+      "name": "return empty - if not in blacklist1"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "qzAXntASvJ07Z0jH",
+          "mode": "list",
+          "cachedResultName": "users",
+          "cachedResultUrl": "/projects/9rpT09WmBICv6OvG/datatables/qzAXntASvJ07Z0jH"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "is_admin": false,
+            "phone_number": "={{ $('getPhoneNumber').item.json.pn.split(\"@\")[0] }}",
+            "chat_id": "={{ $('getPhoneNumber').item.json.pn}}",
+            "name": "={{ $('Start') .item.json.payload._data.notifyName}}",
+            "message_id": "={{ $('Start').item.json.payload.id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "is_admin",
+              "displayName": "is_admin",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "message_id",
+              "displayName": "message_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "phone_number",
+              "displayName": "phone_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1120,
+        -144
+      ],
+      "id": "91bad2d5-8898-4f0e-838c-3ec6a7f862fb",
+      "name": "Insert row"
+    }
+  ],
+  "pinData": {}
+}

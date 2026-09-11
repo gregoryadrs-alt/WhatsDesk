@@ -1,0 +1,387 @@
+{
+  "name": "customerChatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "1b630102-2ce6-41c8-9a16-732f14e29fb2",
+      "typeVersion": 1.1,
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        672,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Start').item.json.user.chat_id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        1392,
+        -144
+      ],
+      "id": "7f6e010e-062e-435c-a979-5fdc53ef5025",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "K7MpygzFSq0cxfKq",
+          "mode": "list",
+          "cachedResultName": "Products",
+          "cachedResultUrl": "/projects/9rpT09WmBICv6OvG/datatables/K7MpygzFSq0cxfKq"
+        },
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}"
+      },
+      "type": "n8n-nodes-base.dataTableTool",
+      "typeVersion": 1.1,
+      "position": [
+        1520,
+        -144
+      ],
+      "id": "98fb77c3-d211-4668-880b-1340cac44670",
+      "name": "products"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "Hj5u2iirrbTsoDAT",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/Hj5u2iirrbTsoDAT",
+          "cachedResultName": "sendMessage"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "waha_session": "={{ $('Start').item.json.waha.session }}",
+            "user_chat_id": "={{ $('Start').item.json.user.chat_id }}",
+            "user_message_id": "={{ $('Start').item.json.user.message_id }}",
+            "output": "={{ $('AI Agent').item.json.output }}"
+          },
+          "matchingColumns": [
+            "waha_session",
+            "user_chat_id",
+            "user_message_id",
+            "output"
+          ],
+          "schema": [
+            {
+              "id": "waha_session",
+              "displayName": "waha_session",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "user_chat_id",
+              "displayName": "user_chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "user_message_id",
+              "displayName": "user_message_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "output",
+              "displayName": "output",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1680,
+        -368
+      ],
+      "name": "Call sendMessage",
+      "id": "c2a5fe16-cedb-4cec-85b3-a96bed48497f"
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.waha.payload.body }}",
+        "guardrails": {
+          "topicalAlignment": {
+            "value": {
+              "threshold": 0.8,
+              "prompt": "You are a content analysis system that determines if text stays on topic.\n\nBUSINESS SCOPE: a popular culinary business in Semarang specializing in delicious noodles and spicy spring rolls.\n\nDetermine if the text stays within the defined business scope. Flag any content\nthat strays from the allowed topics."
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.guardrails",
+      "typeVersion": 2,
+      "position": [
+        896,
+        -112
+      ],
+      "id": "da796e22-06b2-4113-a3b4-74db2b9b9d8c",
+      "name": "Guardrails"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "Hj5u2iirrbTsoDAT",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/Hj5u2iirrbTsoDAT",
+          "cachedResultName": "sendMessage"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "waha_session": "={{ $('Start').item.json.waha.session }}",
+            "user_chat_id": "={{ $('Start').item.json.user.chat_id }}",
+            "user_message_id": "={{ $('Start').item.json.user.message_id }}",
+            "output": "=Mohon maaf saya tidak bisa melayani permintaan yang ini."
+          },
+          "matchingColumns": [
+            "waha_session",
+            "user_chat_id",
+            "user_message_id",
+            "output"
+          ],
+          "schema": [
+            {
+              "id": "waha_session",
+              "displayName": "waha_session",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "user_chat_id",
+              "displayName": "user_chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "user_message_id",
+              "displayName": "user_message_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "output",
+              "displayName": "output",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1376,
+        32
+      ],
+      "name": "sendMessage failed",
+      "id": "4edd5e81-a848-4349-b76f-b96c213358b1"
+    },
+    {
+      "parameters": {
+        "description": "call this tool to execute checkout and generate invoice",
+        "workflowId": {
+          "__rl": true,
+          "value": "FOkFdRnHmkuvCSdF",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/FOkFdRnHmkuvCSdF",
+          "cachedResultName": "generateInvoice"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "total_amount": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('total_amount', `calculate total amount of the order`, 'number') }}",
+            "invoice_number": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('invoice_number', `invoice number format : INV-#INDEX-DD-MM-YY\nexample : INV-#1-13-18-26`, 'string') }}",
+            "customer_name": "={{ $('Start').item.json.user.name }}",
+            "phone_number": "={{ $('Start').item.json.user.phone_number }}",
+            "output_items_parseJson": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('output_items_parseJson', `fetch output+items_parseJson of the order,remove units of measurement in quantity, example:\n'''\n\"quantity\":\"1 kg\" -> this is wrong!\n\"quantity\":1 -> this is CORRECT!`, 'string') }}",
+            "waha": "={{ $('Start').item.json.waha }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "invoice_number",
+              "displayName": "invoice_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "phone_number",
+              "displayName": "phone_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number",
+              "removed": false
+            },
+            {
+              "id": "total_amount",
+              "displayName": "total_amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number",
+              "removed": false
+            },
+            {
+              "id": "output_items_parseJson",
+              "displayName": "output_items_parseJson",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "waha",
+              "displayName": "waha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        1632,
+        -144
+      ],
+      "id": "e16766b0-fdf4-4a69-b50c-f5a4a7f6d97f",
+      "name": "generateInvoice"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        1744,
+        -144
+      ],
+      "id": "5f3da4ff-0bca-48cf-8f96-07b4aa32340b",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1264,
+        -144
+      ],
+      "id": "558e8b86-5684-462d-afd6-017c3599e9a4",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "82g9RlpfpOHz9vmZ",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        896,
+        96
+      ],
+      "id": "dbf17848-90e8-4950-be52-a3ab57d061bf",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "82g9RlpfpOHz9vmZ",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Start').item.json.waha.payload.body }}",
+        "options": {
+          "systemMessage": "=You are Arif, a friendly, helpful, and highly knowledgeable virtual assistant for \"Mie Soetta & Loenpia Rawit\", a popular culinary business in Semarang specializing in delicious noodles and spicy spring rolls. Your primary goal is to assist customers with product knowledge and immediately execute orders using the invoice generator.\nShop Locations:\n1.\tJl. Arteri Soekarno Hatta No. 20b, Palebon, Kec. Pedurungan, Kota Semarang, Jawa Tengah 50246, Indonesia\n2.\tJl. Suratmo No. 29X, Semarang Barat, Kota Semarang, Jawa Tengah, Indonesia\nKey Guidelines:\n1. Persona & Tone:\n•\tIdentity: You are Arif.\n•\tTone: Warm, welcoming, helpful, and polite but relaxed (casual Indonesian, not overly formal). Use friendly greetings like \"Halo Sahabat Soetta!\" or \"Halo Kak!\". Avoid using formal/religious greetings like \"Assalamu’alaikum\".\n•\tStyle: Patient and responsive. Use Markdown for readability. Escape double quotes when necessary.\n2. Expertise & Data Sources:\n•\tPrimary Brain: You rely strictly on the products table (N8N Datatable).\n•\tProduct Descriptions: Read the description column to explain the taste, toppings, portions, and benefits of the menu.\no\tExample: Description \"Mie kenyal dengan ayam cincang gurih melimpah\" -> \"Mienya kenyal bumbunya meresap, ditambah toping ayam cincang gurih yang melimpah, Kak.\"\n•\tAccuracy: Do not invent details. If an item or price is not in the table, check SerpAPI2 or politely admit you don't know.\n3. Tool Utilization:\n•\tproducts (N8N Datatable):\no\tUSAGE: Check this immediately when a user asks about menu availability, prices, or product details.\no\tConstraint: Only sell items listed here.\n•\tgenerateInvoice (CRITICAL TOOL - PRIORITY HIGH):\no\tTRIGGER: You MUST call this tool IMMEDIATELY when the user confirms an item and quantity, or expresses intent to buy (e.g., \"oke saya ambil\", \"mau beli mi ayam komplit 2\", \"bungkus\", \"totalnya berapa\", \"checkout\", \"deal\").\no\tSTRICT RULE: DO NOT ask for the user's Name or Phone Number. (The system already knows who they are).\no\tSTRICT RULE: DO NOT ask \"Ada lagi yang ingin ditambahkan?\" (Is there anything else?) before generating the invoice. Generate the invoice FIRST.\no\tSTRICT RULE: If generateInvoice returns a payment URL, display it as plain text only. Do not convert it into markdown hyperlink format. Do not use [url](url).\no\tAction: Call generateInvoice with the confirmed items and quantities.\no\tPost-Action: Display the result returned by the tool.\n•\tbot_handoff: Use this tool if the user explicitly requests to talk to a human or has a complex complaint.\n•\tSerpAPI2: Fallback for general facts or basic location/area queries only.\nConversation Flow & Closing the Sale:\n1.\tConsult: User asks -> Search products -> Reply with Description & Price.\n2.\tNudge: After explaining, gently push for a decision: \"Mau langsung dipesan Mie Ayam Komplitnya, Kak?\" or \"Mau sekalian dicoba Loenpia Rawitnya buat camilan?\"\n3.\tExecute: As soon as they say \"Yes\", specify a quantity, or show checkout intent, STOP TALKING AND CALL THE TOOL.\nStandard Operating Procedure for Checkout (Strict):\n•\tStep 1: Intent Detected: User says \"Oke aku mau mi ayam jumbo 2\", \"Mau bayar\", or \"Bungkus Paket Timi 1 nya\".\n•\tStep 2: Verification: Ensure you know which item and how many. (If they just say \"Aku mau beli dong\", ask \"Mau pesan menu apa dan berapa porsi, Kak?\").\n•\tStep 3: IMMEDIATE ACTION: Once Item + Qty is known, Call generateInvoice.\no\tDo NOT ask for Name.\no\tDo NOT ask for Address/Ongkir.\no\tDo NOT ask \"Are you sure?\".\n•\tStep 4: Confirmation: Present the generated invoice summary to the user.\nImportant Notes:\n•\tSkip Data Collection: Customer Name and Phone Number are automatically handled by the system (WAHA). Do not mention them.\n•\tNo Shipping/Ongkir: Do not ask for address or shipping costs during the chat.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1312,
+        -368
+      ],
+      "id": "8d4d3f60-763f-4256-bf9b-15138fe480e3",
+      "name": "AI Agent"
+    }
+  ],
+  "pinData": {}
+}
