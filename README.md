@@ -84,3 +84,7 @@ flowchart LR
     Wait2 --> SendWA["WAHA: Send Text<br/>(Kirim Bukti Pembayaran)"]
     SendWA --> Cust([" Customer"])
 ```
+
+
+<img width="720" height="1255" alt="WhatsApp Image 2026-09-14 at 09 34 25 (2)" src="https://github.com/user-attachments/assets/a1208594-fa14-4700-a950-d7e18e7e442e" />
+<img width="720" height="988" alt="invcontoh" src="https://github.com/user-attachments/assets/ba06da62-8703-473e-882e-7a1ac2190c7b" />
